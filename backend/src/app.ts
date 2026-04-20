@@ -22,6 +22,7 @@ import { matriculaRouter } from './modules/academico/matriculas/matricula.routes
 import { diarioRouter } from './modules/academico/diario/diario.routes.js';
 import { requerimentoRouter } from './modules/academico/requerimentos/requerimento.routes.js';
 import { historicoRouter } from './modules/academico/historico/historico.routes.js';
+import { meRouter } from './modules/me/me.routes.js';
 
 export function createApp(): express.Application {
   const app = express();
@@ -60,6 +61,7 @@ export function createApp(): express.Application {
   app.use('/api/diario', diarioRouter);
   app.use('/api/requerimentos', requerimentoRouter);
   app.use('/api/historico', historicoRouter);
+  app.use('/api/me', meRouter);
 
   // Error handler (SEMPRE por último)
   app.use(errorHandler);
