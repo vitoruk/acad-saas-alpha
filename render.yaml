@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: acad-saas-api
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter backend build
+    startCommand: pnpm --filter backend start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: PFX_KEK_BASE64
+        sync: false
+      - key: PFX_KEK_VERSION
+        value: "1"
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      - key: VALIDADOR_PUBLIC_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+
+  - type: web
+    name: acad-saas-validador-publico
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter backend build
+    startCommand: pnpm --filter backend start:validador
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10001"
+      - key: VALIDADOR_MODE
+        value: "true"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
