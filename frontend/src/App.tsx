@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from './lib/auth';
 import Login from './pages/Login';
+import AuthCallback from './pages/AuthCallback';
 import Validador from './pages/Validador';
 import PortalAluno from './pages/PortalAluno';
 import PortalProfessor from './pages/PortalProfessor';
@@ -36,6 +37,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/validar" element={<Validador />} />
       <Route path="/validar/:numeroRegistro" element={<Validador />} />
       <Route
