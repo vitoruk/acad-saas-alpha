@@ -12,6 +12,7 @@ import rateLimit from 'express-rate-limit';
 import { env, corsOrigins } from './config/env.js';
 import { logger } from './lib/logger.js';
 import { errorHandler } from './middleware/error-handler.js';
+import { requestId } from './middleware/request-id.js';
 
 // Rotas
 import { diplomaRouter } from './modules/diplomas/diploma.routes.js';
@@ -23,20 +24,45 @@ import { diarioRouter } from './modules/academico/diario/diario.routes.js';
 import { requerimentoRouter } from './modules/academico/requerimentos/requerimento.routes.js';
 import { historicoRouter } from './modules/academico/historico/historico.routes.js';
 import { meRouter } from './modules/me/me.routes.js';
+import { publicMetaRouter } from './modules/meta/meta.routes.js';
 
 export function createApp(): express.Application {
   const app = express();
 
+  // Trust proxy (Render/Cloudflare) para ler X-Forwarded-For corretamente
+  app.set('trust proxy', 1);
   app.disable('x-powered-by');
+
+  // Request ID ANTES do logger para correlação
+  app.use(requestId());
+
   app.use(helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
-    contentSecurityPolicy: false, // APIs não precisam de CSP
+    contentSecurityPolicy: false, // APIs JSON não precisam de CSP
+    hsts: env.NODE_ENV === 'production'
+      ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+      : false,
   }));
-  app.use(cors({ origin: corsOrigins, credentials: true }));
+
+  // CORS com allowlist (sem origem = server-to-server, permitido)
+  app.use(cors({
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      if (corsOrigins.includes('*') || corsOrigins.includes(origin)) return cb(null, true);
+      return cb(new Error(`Origin ${origin} not allowed by CORS`));
+    },
+    credentials: true,
+    maxAge: 86400,
+  }));
+
   app.use(compression());
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  app.use(pinoHttp({ logger }));
+
+  app.use(pinoHttp({
+    logger,
+    customProps: (req) => ({ requestId: (req as express.Request).id }),
+  }));
 
   const limiter = rateLimit({
     windowMs: env.RATE_LIMIT_WINDOW_MS,
@@ -46,10 +72,13 @@ export function createApp(): express.Application {
   });
   app.use('/api', limiter);
 
-  // Health checks
+  // Health checks (simples e sem dependências)
   app.get('/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
   app.get('/healthz', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
   app.get('/ready', (_req, res) => res.json({ status: 'ready' }));
+
+  // Meta (security.txt, robots.txt, healthz/deep)
+  app.use('/', publicMetaRouter);
 
   // Validador público (sem auth, acessível ao público)
   app.use('/public/validar', validadorPublicoRouter);

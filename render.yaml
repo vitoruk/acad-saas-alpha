@@ -1,4 +1,127 @@
 services:
+  # ============================================================
+  # API principal (autenticada)
+  # ============================================================
+  - type: web
+    name: acad-saas-api
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: .
+    buildCommand: npm install -g pnpm@9.12.0 && pnpm install --frozen-lockfile && pnpm --filter backend build
+    startCommand: pnpm --filter backend start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20.11.1"
+      - key: PORT
+        value: "10000"
+      - key: LOG_LEVEL
+        value: info
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: PFX_KEK_BASE64
+        sync: false
+      - key: PFX_KEK_VERSION
+        value: "1"
+      - key: SIGN_TOKEN_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        sync: false
+      - key: VALIDADOR_PUBLIC_URL
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: IES_CODIGO_EMEC
+        value: "9999"
+      - key: IES_CNPJ
+        sync: false
+      - key: IES_NOME
+        value: "Faculdade Alpha"
+      - key: IES_UF
+        value: "PE"
+      - key: IES_MUNICIPIO
+        value: "Recife"
+
+  # ============================================================
+  # Validador público (sem auth)
+  # ============================================================
+  - type: web
+    name: acad-saas-validador-publico
+    runtime: node
+    plan: starter
+    region: oregon
+    rootDir: .
+    buildCommand: npm install -g pnpm@9.12.0 && pnpm install --frozen-lockfile && pnpm --filter backend build
+    startCommand: pnpm --filter backend start:validador
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "20.11.1"
+      - key: PORT
+        value: "10001"
+      - key: VALIDADOR_MODE
+        value: "true"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+
+  # ============================================================
+  # Frontend (SPA estática)
+  # ============================================================
+  - type: web
+    name: acad-saas-web
+    runtime: static
+    plan: starter
+    region: oregon
+    rootDir: frontend
+    buildCommand: npm install -g pnpm@9.12.0 && cd .. && pnpm install --frozen-lockfile && pnpm --filter frontend build
+    staticPublishPath: ./dist
+    autoDeploy: true
+    pullRequestPreviewsEnabled: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=(), interest-cohort=()
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+services:
   - type: web
     name: acad-saas-api
     runtime: node

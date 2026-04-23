@@ -6,9 +6,17 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-test-build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "22"]
     steps:
       - uses: actions/checkout@v4
 
@@ -18,17 +26,54 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ matrix.node }}
           cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck
-        run: pnpm typecheck
+        run: pnpm -r typecheck
+
+      - name: Lint
+        run: pnpm -r lint --if-present
 
       - name: Test
-        run: pnpm test
+        run: pnpm -r test --if-present
 
       - name: Build
-        run: pnpm build
+        run: pnpm -r build
+
+      - name: Upload backend artifact
+        if: matrix.node == '20'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: backend/dist
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload frontend artifact
+        if: matrix.node == '20'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist
+          if-no-files-found: ignore
+          retention-days: 7
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Audit (high+)
+        run: pnpm audit --prod --audit-level=high || true

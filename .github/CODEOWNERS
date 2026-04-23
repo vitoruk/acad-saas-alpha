@@ -1,0 +1,11 @@
+# Proprietários de código do ACAD-SaaS
+# Cada push/PR nas áreas abaixo notifica os owners automaticamente.
+
+*                               @vitoruk
+/backend/src/modules/diploma/   @vitoruk
+/backend/src/modules/me/        @vitoruk
+/backend/src/security/          @vitoruk
+/database/                      @vitoruk
+/docs/                          @vitoruk
+/.github/                       @vitoruk
+render.yaml                     @vitoruk

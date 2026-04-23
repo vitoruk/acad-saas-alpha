@@ -1,0 +1,159 @@
+openapi: 3.1.0
+info:
+  title: ACAD-SaaS API
+  version: 0.2.0
+  description: |
+    API do ACAD-SaaS — ERP acadêmico, secretaria digital e diploma digital
+    conforme Portaria MEC 554/2019 e Portaria 315/2018.
+  contact:
+    name: Faculdade Alpha
+    email: ti@alpha.edu.br
+  license:
+    name: Proprietária
+
+servers:
+  - url: http://localhost:3000
+    description: Dev local
+  - url: https://acad-saas-api.onrender.com
+    description: Produção
+
+security:
+  - bearerAuth: []
+
+paths:
+  /healthz:
+    get:
+      tags: [meta]
+      summary: Liveness probe
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
+                  ts: { type: string, format: date-time }
+
+  /healthz/deep:
+    get:
+      tags: [meta]
+      summary: Healthcheck com dependências (Supabase)
+      security: []
+      responses:
+        "200": { description: OK }
+        "503": { description: Alguma dependência indisponível }
+
+  /.well-known/security.txt:
+    get:
+      tags: [meta]
+      summary: Política de segurança (RFC 9116)
+      security: []
+      responses:
+        "200":
+          description: Texto plano
+          content:
+            text/plain: {}
+
+  /public/validar/{numero}:
+    get:
+      tags: [diploma-publico]
+      summary: Valida um diploma digital pelo número de registro
+      security: []
+      parameters:
+        - in: path
+          name: numero
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Diploma encontrado
+        "404":
+          description: Não localizado
+
+  /api/me:
+    get:
+      tags: [me]
+      summary: Perfil do usuário autenticado
+      responses:
+        "200": { description: OK }
+        "401": { description: Não autenticado }
+
+  /api/me/historico:
+    get:
+      tags: [me]
+      summary: Histórico acadêmico do aluno logado
+
+  /api/me/cra:
+    get:
+      tags: [me]
+      summary: CRA (coef. rendimento acadêmico) do aluno logado
+
+  /api/me/matriculas:
+    get:
+      tags: [me]
+      summary: Matrículas ativas/históricas do aluno
+
+  /api/me/requerimentos:
+    get:
+      tags: [me]
+      summary: Requerimentos abertos pelo aluno
+
+  /api/me/diplomas:
+    get:
+      tags: [me]
+      summary: Diplomas emitidos para o aluno
+
+  /api/me/export:
+    get:
+      tags: [me, lgpd]
+      summary: LGPD Art. 18, II — portabilidade de dados pessoais
+      responses:
+        "200":
+          description: JSON com todos os dados pessoais
+
+  /api/me/delete-request:
+    post:
+      tags: [me, lgpd]
+      summary: LGPD Art. 18, VI — solicitação de eliminação (fluxo de 15 dias)
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                motivo: { type: string }
+      responses:
+        "202": { description: Solicitação registrada }
+
+  /api/diplomas/emitir:
+    post:
+      tags: [diplomas]
+      summary: Emite novo diploma (MEC 554/2019)
+      responses:
+        "201": { description: Diploma emitido }
+        "401": { description: Não autenticado }
+        "403": { description: Sem permissão }
+
+  /api/cursos:
+    get: { tags: [academico], summary: Lista cursos }
+  /api/turmas:
+    get: { tags: [academico], summary: Lista turmas }
+  /api/matriculas:
+    get: { tags: [academico], summary: Lista matrículas }
+  /api/diario:
+    get: { tags: [academico], summary: Lista lançamentos de diário }
+  /api/requerimentos:
+    get: { tags: [secretaria], summary: Lista requerimentos }
+  /api/historico:
+    get: { tags: [academico], summary: Histórico por aluno }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
