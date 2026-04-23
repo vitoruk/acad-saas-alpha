@@ -48,6 +48,7 @@ export function createApp(): express.Application {
 
   // Health checks
   app.get('/health', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
+  app.get('/healthz', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
   app.get('/ready', (_req, res) => res.json({ status: 'ready' }));
 
   // Validador público (sem auth, acessível ao público)
