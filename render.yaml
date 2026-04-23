@@ -5,7 +5,7 @@ services:
   - type: web
     name: acad-saas-api
     runtime: node
-    plan: starter
+    plan: free
     region: oregon
     rootDir: .
     buildCommand: npm install -g pnpm@9.12.0 && NODE_ENV=development pnpm install --frozen-lockfile && pnpm --filter backend build && pnpm install --prod --frozen-lockfile
@@ -60,7 +60,7 @@ services:
   - type: web
     name: acad-saas-validador-publico
     runtime: node
-    plan: starter
+    plan: free
     region: oregon
     rootDir: .
     buildCommand: npm install -g pnpm@9.12.0 && NODE_ENV=development pnpm install --frozen-lockfile && pnpm --filter backend build && pnpm install --prod --frozen-lockfile
