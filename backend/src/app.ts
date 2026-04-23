@@ -77,6 +77,24 @@ export function createApp(): express.Application {
   app.get('/healthz', (_req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
   app.get('/ready', (_req, res) => res.json({ status: 'ready' }));
 
+  // Landing (evita "Cannot GET /")
+  app.get('/', (_req, res) => {
+    res.json({
+      name: 'ACAD-SaaS API',
+      status: 'online',
+      docs: '/docs/openapi.yaml',
+      endpoints: {
+        health: '/healthz',
+        deepHealth: '/healthz/deep',
+        securityTxt: '/.well-known/security.txt',
+        robots: '/robots.txt',
+        validadorPublico: '/public/validar/:numero',
+        api: '/api',
+      },
+      ts: new Date().toISOString(),
+    });
+  });
+
   // Meta (security.txt, robots.txt, healthz/deep)
   app.use('/', publicMetaRouter);
 
