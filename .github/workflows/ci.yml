@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload backend artifact
         if: matrix.node == '20'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-dist
           path: backend/dist
@@ -55,7 +55,7 @@ jobs:
 
       - name: Upload frontend artifact
         if: matrix.node == '20'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-dist
           path: frontend/dist
