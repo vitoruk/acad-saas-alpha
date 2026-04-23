@@ -8,7 +8,7 @@ services:
     plan: starter
     region: oregon
     rootDir: .
-    buildCommand: npm install -g pnpm@9.12.0 && pnpm install --frozen-lockfile && pnpm --filter backend build
+    buildCommand: npm install -g pnpm@9.12.0 && NODE_ENV=development pnpm install --frozen-lockfile && pnpm --filter backend build && pnpm install --prod --frozen-lockfile
     startCommand: pnpm --filter backend start
     healthCheckPath: /healthz
     autoDeploy: true
@@ -63,7 +63,7 @@ services:
     plan: starter
     region: oregon
     rootDir: .
-    buildCommand: npm install -g pnpm@9.12.0 && pnpm install --frozen-lockfile && pnpm --filter backend build
+    buildCommand: npm install -g pnpm@9.12.0 && NODE_ENV=development pnpm install --frozen-lockfile && pnpm --filter backend build && pnpm install --prod --frozen-lockfile
     startCommand: pnpm --filter backend start:validador
     healthCheckPath: /health
     autoDeploy: true
@@ -90,7 +90,7 @@ services:
     plan: starter
     region: oregon
     rootDir: frontend
-    buildCommand: npm install -g pnpm@9.12.0 && cd .. && pnpm install --frozen-lockfile && pnpm --filter frontend build
+    buildCommand: npm install -g pnpm@9.12.0 && cd .. && NODE_ENV=development pnpm install --frozen-lockfile && pnpm --filter frontend build
     staticPublishPath: ./dist
     autoDeploy: true
     pullRequestPreviewsEnabled: true
