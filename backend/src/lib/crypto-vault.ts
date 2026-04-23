@@ -20,9 +20,9 @@ function getKek(version: number = env.PFX_KEK_VERSION): Buffer {
       `KEK versão ${version} não configurada (atual: ${env.PFX_KEK_VERSION}). Rotação pendente.`,
     );
   }
-  const kek = Buffer.from(env.PFX_KEK_BASE64, 'base64');
-  if (kek.length !== 32) {
-    throw new Error(`PFX_KEK_BASE64 deve decodificar para 32 bytes (obtido: ${kek.length})`);
+  const kek = Buffer.from(env.PFX_KEK_BASE64 ?? '', 'base64');
+  if (!env.PFX_KEK_BASE64 || kek.length !== 32) {
+    throw new Error(`PFX_KEK_BASE64 inválida ou ausente neste serviço (${kek.length} bytes).`);
   }
   return kek;
 }

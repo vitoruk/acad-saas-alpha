@@ -10,10 +10,10 @@ const EnvSchema = z.object({
 
   SUPABASE_URL: z.string().url(),
   SUPABASE_ANON_KEY: z.string().min(10),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(10),
-  SUPABASE_JWT_SECRET: z.string().min(10),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(10).optional(),
+  SUPABASE_JWT_SECRET: z.string().min(10).optional(),
 
-  PFX_KEK_BASE64: z.string().min(43), // 32 bytes base64 = 44 chars
+  PFX_KEK_BASE64: z.string().min(43).optional(), // 32 bytes base64 = 44 chars
   PFX_KEK_VERSION: z.coerce.number().int().positive().default(1),
   SIGN_TOKEN_SECRET: z.string().min(16).default('dev-sign-token-secret-change-me-123'),
   SIGN_TOKEN_TTL_HOURS: z.coerce.number().int().positive().default(72),
@@ -58,7 +58,20 @@ function loadEnv(): Env {
     }
     process.exit(1);
   }
-  return parsed.data;
+
+  const data = parsed.data;
+
+  // Fora do modo validador (API principal), as vars privadas são obrigatórias
+  if (!data.VALIDADOR_MODE && process.env.NODE_ENV === 'production') {
+    const missing = (['SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_JWT_SECRET', 'PFX_KEK_BASE64'] as const)
+      .filter((k) => !data[k]);
+    if (missing.length) {
+      console.error('❌ Variáveis obrigatórias ausentes na API:', missing);
+      process.exit(1);
+    }
+  }
+
+  return data;
 }
 
 export const env = loadEnv();
