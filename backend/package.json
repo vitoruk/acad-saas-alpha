@@ -19,7 +19,7 @@
     "@signpdf/signpdf": "^3.3.0",
     "@supabase/supabase-js": "^2.45.4",
     "@xmldom/xmldom": "^0.9.3",
-    "axios": "^1.7.7",
+    "axios": "^1.15.2",
     "compression": "^1.7.5",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
